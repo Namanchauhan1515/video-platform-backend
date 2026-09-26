@@ -1,8 +1,9 @@
-import Playlist from "../models/playlist.model.js"
+import {Playlist} from "../models/playlist.model.js"
 import apiError from "../utils/apiError.js"
 import apiResponse from "../utils/apiResponse.js"
 import asyncHandler from "../utils/asyncHandler.js"
 import mongoose, { isValidObjectId } from "mongoose";
+
 const createPlaylist = asyncHandler(async(req,res)=>{
     const {name,discription} = req.body
     if(!name.trim() || !discription.trim()){
@@ -88,11 +89,60 @@ const removeVideoFromPlaylist = adsyncHandler(async(req,res)=>{
     return res.status(200).json(new apiResponse(200,playlist,"Video removed from playlist successfully"))
 
 })
+const deletePlaylist = asyncHandler(async (req, res) => {
+    const {playlistId} = req.params
+    // TODO: delete playlist
+    if(!mongoose.isValidObjectId(playlistId)){
+        throw new apiError(400,"playlist is not found")
+    }
+    const playlist =  await Playlist.findById(playlistId)
+    if(!playlist){
+        throw new apiError(404,"playlist not found")
+    }
+await Playlist.findByIdAndDelete(playlist._id)
+    return res.status(200,{},"playlist delete successfully")
+})
+const updatePlaylist = asyncHandler(async (req, res) => {
+    const {playlistId,videoId} = req.params
+    const {name, description} = req.body
+
+    if(!name.trim() || !description.trim())
+    //TODO: update playlist
+    if(!mongoose.isValidObjectId(playlistId)){
+        throw new apiError(400,"playlist is not found")
+    }
+    const playlist = await Playlist.findOne({
+        _id: playlistId,
+        owner: req.user._id
+    });
+    if(!playlist){
+        throw new apiError(404,"playlist not found")
+    }
+     const playlistUpdate = await Playlist.findByIdAndUpdate(
+        playlistId,{
+            $set:{
+                name:name.trin(),
+                description:description.trim()
+
+            }
+        },{
+            new:true,
+            runValidators:true
+        }
+     )
+     if(!playlistUpdate){
+        throw new apiError(500,"playlist is not update")
+     }
+     return res.status(200).json(
+        new apiResponse(200,playlistUpdate,"playlist is update successfully")
+     )
+})
 export {createPlaylist,
 getAllPlaylist,
 getPlaylistById,
 addVideoToPlaylist,
-removeVideoFromPlaylist
+removeVideoFromPlaylist,
+deletePlaylist,updatePlaylist
 }
 
 

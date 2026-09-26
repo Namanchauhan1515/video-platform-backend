@@ -14,10 +14,10 @@ videos:[
        ref:"Video"
     }
    ],
-   owner:{
+owner:{
      type:mongoose.Schema.Types.ObjectId,
      ref:"User"
-   }
+       }
 
 },{timestamps:true})
 export const Playlist = mongoose.model("Playlist",playlistSchema)
